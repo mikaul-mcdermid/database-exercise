@@ -1,0 +1,1 @@
+MySQL introductory exercises for Codeup cohort Ursula
