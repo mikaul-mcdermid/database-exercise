@@ -16,7 +16,7 @@ SELECT * FROM employees WHERE first_name IN ('irena', 'vidya', 'maya') AND gende
 -- 4.)Find all unique last names that start with 'E'.
 SELECT * FROM employees WHERE last_name LIKE 'E%';
 -- 5.)Find all unique last names that start or end with 'E'.
-SELECT * FROM employees WHERE last_name LIKE 'E%' AND last_name LIKE '%E';
+SELECT * FROM employees WHERE last_name LIKE 'E%' OR last_name LIKE '%E';
 -- 6.)Find all unique last names that end with E, but does not start with E?
 SELECT * FROM employees WHERE last_name LIKE '%E' AND last_name NOT LIKE 'E%';
 -- 7.)Find all unique last names that start and end with 'E'.
