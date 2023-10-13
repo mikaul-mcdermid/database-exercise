@@ -16,19 +16,19 @@ SELECT * FROM employees WHERE first_name IN ('irena', 'vidya', 'maya') AND gende
 -- 4.)Find all unique last names that start with 'E'.
 SELECT * FROM employees WHERE last_name LIKE 'E%';
 -- 5.)Find all unique last names that start or end with 'E'.
-SELECT * FROM employees WHERE last_name LIKE 'E%' OR last_name LIKE '%E';
+SELECT DISTINCT last_name FROM employees WHERE last_name LIKE 'E%' OR last_name LIKE '%E';
 -- 6.)Find all unique last names that end with E, but does not start with E?
 SELECT * FROM employees WHERE last_name LIKE '%E' AND last_name NOT LIKE 'E%';
 -- 7.)Find all unique last names that start and end with 'E'.
-SELECT * FROM employees WHERE last_name LIKE '%E' AND last_name LIKE 'E%';
+SELECT DISTINCT last_name FROM employees WHERE last_name LIKE '%E' AND last_name LIKE 'E%'; -- or use LIKE '%E%' instead
 -- 8.)Find all current or previous employees hired in the 90s. Enter a comment with the top three employee numbers.
-SELECT * FROM employees WHERE hire_date BETWEEN '1990-01-01' AND '1999-12-31';
+SELECT * FROM employees WHERE hire_date BETWEEN '1990-01-01' AND '1999-12-31'; -- can remove dashes and it'll work
 -- 9.)Find all current or previous employees born on Christmas. Enter a comment with the top three employee numbers.
-SELECT * FROM employees WHERE birth_date LIKE '%12-25';
+SELECT * FROM employees WHERE birth_date LIKE '%12-25'; -- 10078/10115/10261
 -- 10.)Find all current or previous employees hired in the 90s and born on Christmas. Enter a comment with the top three employee numbers.
 SELECT * FROM employees WHERE (birth_date LIKE '%12-25') AND hire_date BETWEEN '1990-01-01' AND '1999-12-31';
 # A: 10261, 10438, 10681
 -- 11.)Find all unique last names that have a 'q' in their last name.
-SELECT * FROM employees WHERE last_name LIKE '%q%';
+SELECT DISTINCT last_name FROM employees WHERE last_name LIKE '%q%';
 -- 12.)Find all unique last names that have a 'q' in their last name but not 'qu'.
-SELECT * FROM employees WHERE last_name LIKE '%q%' AND last_name NOT LIKE '%qu%';
+SELECT DISTINCT last_name FROM employees WHERE last_name LIKE '%q%' AND last_name NOT LIKE '%qu%';

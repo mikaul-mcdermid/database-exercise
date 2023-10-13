@@ -11,7 +11,8 @@ SELECT * FROM employees WHERE first_name IN ('Irena', 'Vidya', 'Maya') ORDER BY 
 SELECT * FROM employees WHERE first_name IN ('Irena', 'Vidya', 'Maya') ORDER BY last_name, first_name; -- Irena Acton/Maya Zyda
 -- Write a query to find all employees whose last name starts and ends with 'E'. Sort the results by their employee number. Enter a comment with the number of employees returned, the first employee number and their first and last name, and the last employee number with their first and last name.
 SELECT * FROM employees WHERE last_name LIKE '%E' AND last_name LIKE 'E%' ORDER BY emp_no; -- 899/Ramzi Erde/ Tadahiro Erde
+# SELECT * FROM employees WHERE last_name LIKE 'E%E' ORDER BY emp_no; 
 -- Write a query to find all employees whose last name starts and ends with 'E'. Sort the results by their hire date, so that the newest employees are listed first. Enter a comment with the number of employees returned, the name of the newest employee, and the name of the oldest employee.
 SELECT * FROM employees WHERE last_name LIKE '%E' AND last_name LIKE 'E%' ORDER BY hire_date DESC; -- 899/ Teiji Eldridge / Sergi Erde
 -- Find all employees hired in the 90s and born on Christmas. Sort the results so that the oldest employee who was hired last is the first result. Enter a comment with the number of employees returned, the name of the oldest employee who was hired last, and the name of the youngest employee who was hired first.
-SELECT * FROM employees WHERE (birth_date LIKE '%12-25') AND (hire_date LIKE '199%') ORDER BY birth_date ASC, hire_date DESC; -- 362/ Khun Bernini/ Gudjon Vakili 
+SELECT * FROM employees WHERE (birth_date LIKE '%12-25') AND (hire_date LIKE '199%') ORDER BY birth_date ASC, hire_date DESC; -- 362/ Khun Bernini/ Douadi Pettis

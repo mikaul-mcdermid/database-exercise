@@ -32,7 +32,7 @@ WHERE name = 'Nevermind';
 -- Which albums were released in the 1990s?
 SELECT name
 FROM albums
-WHERE release_date >= 1990 and release_date <= 1999;
+WHERE release_date BETWEEN 1990 and 1999;
 # A: 'Titanic: Music from the Motion Picture'
 -- 'The Immaculate Collection'
 -- 'The Bodyguard'
@@ -80,3 +80,80 @@ WHERE sales < 20000000;
 -- 'The Wall'
 -- 'Supernatural'
 -- 'Appetite for Destruction'
+
+SHOW databases;
+USE chipotle;
+SELECT database();
+SHOW tables; -- only one table, called orders
+SELECT * -- shows me everything
+from orders;
+
+# FORMAT: WHERE [column_name] LIKE %[value]%
+# find all orders that are bowls
+SELECT *
+FROM orders -- table names are case sensitive
+WHERE item_name = 'bowl';
+
+SELECT *
+FROM orders WHERE item_name LIKE '%bowl%'; -- have to utilize both LIKE and the % or MYSQL looks for the % sign in the name of your query
+
+SELECT DISTINCT item_name FROM orders; -- allows us to select distinct names in specific category 
+SELECT DISTINCT * FROM orders WHERE item_name LIKE '%bowl%'; -- doesn't specify what category we're looking for and only exact duplicates would be filtered out (which every order may slightly be different
+SELECT DISTINCT item_name, quantity FROM orders WHERE item_name LIKE '%bowl%%'; -- Multiple distinct selector
+SELECT DISTINCT item_name FROM orders WHERE item_name NOT LIKE '%bowl%'; -- utilizing the NOT command
+# When using wildcards(%) you are checking for variables before or after a search term
+
+# FORMAT: WHERE [column_name] BETWEEN [value1] AND [value2]
+SELECT * FROM orders WHERE order_id BETWEEN 1 and 5;
+
+# FORMAT: WHERE [column_name] IN ([value1],[value2],[value3])
+SELECT * FROM orders WHERE item_name IN ('chicken bowl', 'veggie bowl'); -- have to use parenthesis or it will error out
+SELECT * FROM orders WHERE order_id IN (1,2,3,4,5);
+# Using a wildcard without a LIKE breaks the operation in SQL
+
+# FORMAT: WHERE [column_name] IS [NOT] NULL -- the NOT is optional
+USE join_example_db; -- select new database
+SELECT database(); -- verify you're in the database
+SHOW tables; -- shows tables
+
+SELECT * FROM users WHERE role_id IS NULL; -- NULL command example, be sure to write out IS
+SELECT * FROM users WHERE role_id IS NOT NULL; 
+
+# FORMAT: WHERE [column_name] operator [value1] AND/OR [column_name2] operator [value2]
+# AND will return rows when BOTH conditions are TRUE
+# OR will return rows when EITHER condition is TRUE
+SELECT * FROM users WHERE name = 'sally'; 
+SELECT * FROM users WHERE role_id = 3 AND name = 'sally'; -- both conditions are true in this scenario
+SELECT * FROM users WHERE role_id = 3 OR name = 'jane'; -- shows all possible true conditions
+SELECT * FROM users WHERE role_id = 3 or 1; -- not a complete conditional statement (parenthesis around the values doesn't work either)
+SELECT * FROM users WHERE role_id = 3,1; -- comma doesn't work either
+SELECT * FROM users WHERE role_id IN (3,1); 
+
+
+# FORMAT ORDER BY [column_name] [ASC/DES]alter
+-- 1 SELECT
+-- FROM
+-- WHERE 
+-- ORDER BY -- sorts our rows
+USE chipotle; 
+SELECT database();
+SELECT * FROM orders WHERE item_name LIKE '%bowl%' AND quantity > 1 ORDER BY quantity ASC;
+SELECT * FROM orders WHERE item_name LIKE '%bowl%' AND quantity > 1 ORDER BY quantity; -- defaults to ascending format, must manually select descending
+SELECT * FROM orders WHERE item_name LIKE '%bowl%' AND quantity > 1 ORDER BY quantity DESC; 
+SELECT * FROM orders WHERE item_name LIKE '%bowl%' AND quantity > 1 ORDER BY quantity DESC, item_name; -- order by is stackable and will sort left to right. In this example we chose quantity first and then item name so it will start with quantity unless we reverse the order
+-- secondarily you need to select DESC/ASC for EACH order by modifier
+
+# FORMAT: LIMIT [#]
+-- SELECT
+-- FROM
+-- WHERE
+-- ORDER BY
+-- LIMIT
+
+SELECT * FROM orders LIMIT 5;
+
+# OFFSET -- used with LIMIT to skip a set amount of lines
+SELECT * FROM orders LIMIT 5 OFFSET 10; -- must be used with a LIMIT
+
+# ORDER BY RAND()
+SELECT * FROM orders ORDER BY RAND() LIMIT 5;
