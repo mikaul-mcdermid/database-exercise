@@ -157,3 +157,59 @@ SELECT * FROM orders LIMIT 5 OFFSET 10; -- must be used with a LIMIT
 
 # ORDER BY RAND()
 SELECT * FROM orders ORDER BY RAND() LIMIT 5;
+
+USE farmers_market;
+SELECT database();
+SHOW tables;
+DESCRIBE customer_purchases;
+SELECT * FROM customer_purchases;
+SELECT MIN(market_date) as "Min Date", MAX(market_date) as "Max Date"
+FROM customer_purchases; -- How to utilize MIN() and MAX() simultaneously 
+
+SELECT CONCAT('ID', market_date) FROM customer_purchases; -- How to utilize CONCAT()
+SELECT NOW() - market_date FROM customer_purchases; -- How to get time difference (in seconds)
+SELECT REPLACE(market_date, '-', '/') FROM customer_purchases;
+SELECT SUBSTR(market_date,6,2) as month FROM customer_purchases;
+-- LOWER must only contain one -- function at a time, trying to use it after another function causes it to error as you must input LOWER functions one at a time. You can circumvent this by placing the LOWER/UPPER in front of whatever function you're trying to run
+-- SELECT [column_name_to_group], [column_that_you_summarize]
+-- FROM
+-- WHERE
+-- GROUP BY [column_name_to_group]
+USE chipotle;
+SELECT item_name 
+FROM orders
+WHERE item_name LIKE '%chicken%'
+GROUP BY item_name -- this is the column we're trying to reduce down to its unique values
+;
+# works similar to DISTINCT to return unique values for the specified column
+# can group by multiple variables
+SELECT * -- can't use this since it's too many extra columns to deal with extra data
+FROM orders
+WHERE item_name LIKE '%chicken%'
+GROUP BY item_name, quantity -- multiple columns can be separated with a comma
+;
+
+SELECT item_name, quantity -- minimizes the amount of data returned so the function now works
+FROM orders
+WHERE item_name LIKE '%chicken%'
+GROUP BY item_name, quantity;
+
+SELECT item_name, COUNT(*)
+FROM orders
+WHERE item_name LIKE '%chicken%'
+GROUP BY item_name;
+
+SELECT item_name -- add column name here for GROUPing
+	, MIN(quantity) -- as long as it's a function, you can use multiple filters
+	, MAX(quantity)
+FROM orders
+WHERE item_name like '%chicken%'
+GROUP BY item_name;
+
+
+SELECT item_name, COUNT(*) as cnt-- group by and select must match
+FROM orders
+WHERE item_name like '%chicken%'
+GROUP BY item_name
+HAVING cnt > 100
+ORDER BY cnt DESC;
