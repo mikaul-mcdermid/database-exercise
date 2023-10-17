@@ -25,10 +25,11 @@ FROM employees
 WHERE last_name LIKE '%q%' AND last_name NOT LIKE '%qu%'
 GROUP BY last_name; 
 -- 7 Find all employees with first names 'Irena', 'Vidya', or 'Maya'. Use COUNT(*) and GROUP BY to find the number of employees with those names for each gender.
-SELECT first_name, COUNT(*)
+SELECT first_name, gender, COUNT(*)
 FROM employees
-WHERE first_name LIKE '%Maya%' OR first_name LIKE '%Irena%' OR first_name LIKE '%Vidya%'
-GROUP BY first_name;
+WHERE first_name IN ('Maya', 'Irena', 'Vidya')
+GROUP BY first_name, gender
+ORDER BY first_name;
 -- 8 Using your query that generates a username for all employees, generate a count of employees with each unique username.
 SELECT LOWER(
 			CONCAT(
@@ -54,20 +55,23 @@ SELECT LOWER(
                 COUNT(*) as n_same_username
 FROM employees
 GROUP BY username
-HAVING n_same_username >=2;
+HAVING n_same_username >1
+ORDER BY n_same_username DESC;
 # A: Highest duplicate usernames was 6 sscha/ascha/mscha
 # A: Bonus is 13251
 -- Bonus: More practice with aggregate functions:
 
 -- 1 Determine the historic average salary for each employee. When you hear, read, or think "for each" with regard to SQL, you'll probably be grouping by that exact column.
-SELECT AVG(salary), emp_no
+SELECT round(AVG(salary), 1), emp_no
 FROM salaries
 GROUP BY salary,emp_no
 ;
 -- 2 Using the dept_emp table, count how many current employees work in each department. The query result should show 9 rows, one for each department and the employee count.
-SELECT COUNT(*), dept_no
+SELECT dept_no, COUNT(*) as cnt
 FROM dept_emp
+WHERE to_date = '9999-01-01'
 GROUP BY dept_no
+ORDER BY dept_no
 ;
 -- 3 Determine how many different salaries each employee has had. This includes both historic and current.
 SELECT COUNT(salary), emp_no
@@ -89,12 +93,14 @@ select emp_no, round(std(salary),1), round(stddev(salary),1), count(*)
 FROM salaries
 GROUP BY emp_no;
 -- 7 Find the max salary for each employee where that max salary is greater than $150,000.
-SELECT MAX(salary), emp_no
+SELECT MAX(salary) as max_sal, emp_no
 FROM salaries
-WHERE salary > 150000
-GROUP BY emp_no;
+-- WHERE salary > 150000 -- can use WHERER or HAVING to find answer
+GROUP BY emp_no
+HAVING max_sal > 150000;
 -- 8 Find the average salary for each employee where that average salary is between $80k and $90k.
-SELECT AVG(salary), emp_no
+SELECT round(AVG(salary),1) as avg_sal, emp_no
 FROM salaries
-WHERE salary BETWEEN 80000 AND 90000
-GROUP BY emp_no;
+-- WHERE salary BETWEEN 80000 AND 90000 -- cannot use this for... some reason?
+GROUP BY emp_no
+HAVING avg_sal BETWEEN 80000 AND 90000;
