@@ -12,8 +12,8 @@ SELECT database();
 show tables;
 DESCRIBE roles;
 -- 1 Use the join_example_db. Select all the records from both the users and roles tables.
-SELECT *
-FROM roles, users;
+SELECT * FROM roles;
+SELECT * FROM users;
 -- 2 Use join, left join, and right join to combine results from the users and roles tables as we did in the lesson. Before you run each query, guess the expected number of results.
 SELECT *
 FROM roles as r
@@ -21,12 +21,14 @@ RIGHT JOIN users
 	USING (id)
 ; -- JOIN has 4 results, LEFT JOIN returns 4 results, RIGHT JOIN returns 6 results
 -- 3 Although not explicitly covered in the lesson, aggregate functions like count can be used with join queries. Use count and the appropriate join type to get a list of roles along with the number of users that have the role. Hint: You will also need to use group by in the query.
-SELECT role_id,COUNT(*)
+SELECT 
+	COUNT(u.id), -- specify here for the users
+    r.name 
 FROM roles as r
-INNER JOIN users
-	USING (id)
-    GROUP BY role_id
-    ;
+LEFT JOIN users u
+	-- USING (id)
+    ON r.id=u.role_id
+    GROUP BY r.name;
 -- Employees Database
 USE employees;
 SELECT database();
@@ -50,6 +52,16 @@ JOIN employees e
 	-- ON d.dept_no = 
 WHERE to_date > NOW()
     ;
+    
+SELECT dept_name as 'Department Name',
+CONCAT(e.first_name, ' ', e.last_name) as 'Department Manager'
+FROM departments d
+JOIN dept_manager dm
+	ON d.dept_no=dm.dept_no and dm.to_date > NOW() -- can add current employee filter here
+JOIN employees e
+	ON dm.emp_no=e.emp_no;
+-- WHERE dm.to_date > NOW()
+
 SELECT *
 FROM dept_manager;
 --   Department Name    | Department Manager
@@ -73,6 +85,16 @@ JOIN employees e
 	-- ON d.dept_no = 
 WHERE to_date > NOW() AND gender = 'F'
     ;
+    
+SELECT dept_name as 'Department Name', CONCAT(first_name, ' ', last_name) as 'Manager Name'
+FROM departments d
+JOIN dept_manager dm
+	USING (dept_no)
+JOIN employees e
+	USING (emp_no)
+WHERE e.gender = 'F' AND to_date > NOW()
+ORDER BY dept_name
+;
 
 -- Department Name | Manager Name
 -- ----------------+-----------------
@@ -93,7 +115,18 @@ WHERE dept_name = 'Customer Service' AND t.to_date > NOW() AND de.to_date > NOW(
 GROUP BY title
 ORDER BY title 
     ;
-
+SELECT title as Title, Count(de.emp_no) as Count
+FROM titles t
+JOIN employees e
+	ON t.emp_no=e.emp_no AND t.to_date > NOW()
+JOIN dept_emp de
+	ON e.emp_no=de.emp_no AND de.to_date > NOW()
+JOIN departments d
+	ON de.dept_no=d.dept_no
+WHERE dept_name = 'Customer Service' 
+GROUP BY title
+ORDER BY title
+;
 -- Title              | Count
 -- -------------------+------
 -- Assistant Engineer |    68
@@ -118,6 +151,21 @@ WHERE s.to_date > NOW() AND dm.to_date > NOW() AND de.to_date > NOW()
 ORDER BY dept_name
     ;
 
+describe salaries; -- emp_no
+describe dept_manager;-- emp_no, dept_no
+describe employees; -- emp_no
+describe departments; -- dept_no
+SELECT d.dept_name as 'Department Name', CONCAT(first_name,' ',last_name) as 'Name', s.salary as Salary
+FROM Salaries s
+	JOIN dept_manager dm
+		ON s.emp_no=dm.emp_no AND dm.to_date > NOW() AND s.to_date > NOW()
+	JOIN employees e
+		ON e.emp_no=dm.emp_no
+	JOIN departments d
+		ON d_dept_no=dm.dept_no
+ORDER BY d.dept_name
+        
+	;
 -- Department Name    | Name              | Salary
 -- -------------------+-------------------+-------
 -- Customer Service   | Yuchang Weedman   |  58745
@@ -137,6 +185,16 @@ JOIN dept_emp de
 WHERE de.to_date > NOW()
 GROUP BY dept_no
 ORDER BY dept_no;
+
+describe dept_emp;
+describe departments;
+
+SELECT d.dept_no, d.dept_name, COUNT(de.dept_no)
+FROM departments d
+	JOIN dept_emp de
+		ON d.dept_no=de.dept_no AND de.to_date > NOW()
+GROUP BY d.dept_no, d.dept_name
+ORDER BY d.dept_no;
 
 
 -- +---------+--------------------+---------------+
@@ -164,6 +222,19 @@ GROUP BY dept_no
 ORDER BY average_salary DESC
 LIMIT 1;
 
+describe departments; -- dept no
+describe salaries; -- emp no
+describe dept_emp; -- emp no, dept no
+
+SELECT d.dept_name, AVG(s.salary) as Average_salary
+FROM departments d
+	JOIN dept_emp de
+		ON d.dept_no=de.dept_no AND de.to_date > NOW()
+	JOIN salaries s
+		ON de.emp_no=s.emp_no AND s.to_date > NOW()
+GROUP BY d.dept_name
+ORDER BY Average_salary DESC
+LIMIT 1;
 -- +-----------+----------------+
 -- | dept_name | average_salary |
 -- +-----------+----------------+
@@ -179,6 +250,24 @@ JOIN salaries s
 JOIN employees
 	USING (emp_no)
 WHERE dept_name = 'Marketing'
+ORDER BY salary DESC
+LIMIT 1;
+
+describe employees; -- emp no
+describe salaries; -- emp no and dept no
+describe departments; -- dept no
+describe dept_emp; -- dept no and emp no
+
+SELECT
+FROM employees e
+	JOIN salaries s
+		ON e.emp_no=s.emp_no
+	JOIN dept_emp de
+		ON 
+	JOIN departments d
+		ON s.dept_no=d.dept_no
+	;
+
 -- GROUP BY first_name, last_name
 ORDER BY salary DESC
 LIMIT 1;
@@ -249,14 +338,56 @@ JOIN dept_manager dm
 	USING(dept_no)
 JOIN departments d
 	USING (dept_no)
-JOIN employees
+JOIN employees 
 	ON d.emp.no=e.emp_no
 WHERE de.to_date > NOW() AND dm.to_date > NOW() 
-GROUP BY Employee_Name, Department_Name
--- ORDER BY
 ;
 
+SELECT CONCAT (e.first_name, ' ', e.last_name) AS Employee_Name,
+	d.dept_name AS Department_Name,
+    CONCAT (m.first_name, ' ', m.last_name) AS Manager_Name
+FROM employees e
+JOIN dept_emp AS de
+	ON de.emp_no = e.emp_no
+JOIN departments AS d
+	ON d.dept_no = de.dept_no
+JOIN dept_manager AS dm
+	ON dm.dept_no = de.dept_no
+JOIN employees AS m
+	ON m.emp_no = dm.emp_no
+WHERE dm.to_date > NOW() AND de.to_date > NOW();
 
+SELECT CONCAT(e.first_name,' ',e.last_name) AS 'Employee Name',
+dept_name as 'Department Name', CONCAT(m.first_name,' ',m.last_name) AS 'Manager Name'
+FROM employees e
+	JOIN dept_emp de
+		USING (emp_no)
+	JOIN departments d
+		USING (dept_no)
+	JOIN dept_manager dm
+		USING (dept_no)
+	JOIN employees m
+		ON m.emp_no=dm.emp_no
+		-- USING (emp_no) the USING clause here doesn't work becuase it's ambiguous with the other emp no so you have to specify which one it's going to otherwise this function errors out
+	WHERE dm.to_date > NOW() AND de.to_date > NOW()
+    ORDER BY e.first_name;
+
+
+-- SUBQUERY METHOD
+SELECT CONCAT(e.first_name,' ',e.last_name) AS 'Employee Name',
+dept_name as 'Department Name', CONCAT(m.first_name,' ',m.last_name) AS 'Manager Name'
+FROM employees e
+	JOIN dept_emp de
+		USING (emp_no)
+	JOIN departments d
+		USING (dept_no)
+	JOIN dept_manager dm
+		USING (dept_no)
+	JOIN employees m
+		ON m.emp_no=dm.emp_no
+		-- USING (emp_no) the USING clause here doesn't work becuase it's ambiguous with the other emp no so you have to specify which one it's going to otherwise this function errors out
+	WHERE dm.to_date > NOW() AND de.to_date > NOW()
+    ORDER BY e.first_name;
 -- 240,124 Rows
 
 -- Employee Name | Department Name  |  Manager Name

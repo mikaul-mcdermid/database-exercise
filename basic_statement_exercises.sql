@@ -213,3 +213,81 @@ WHERE item_name like '%chicken%'
 GROUP BY item_name
 HAVING cnt > 100
 ORDER BY cnt DESC;
+
+USE pizza;
+show tables;
+DESCRIBE toppings;
+
+-- Use an assoicative table to combine pizza to toppings, will need pizza toppins table
+SELECT 
+	topping_name,
+    COUNT(*) as cnt
+FROM pizzas AS p
+INNER JOIN pizza_toppings pt
+	-- ON p.pizza_id=pt.pizza_id --one way 
+    USING(pizza_id) -- other way
+INNER JOIN toppings AS t
+	ON pt.topping_id=t.topping_id
+GROUP BY topping_name
+ORDER BY cnt DESC; -- most popular topping is pepperoni and least is pineapple
+
+
+-- If your inner query returns an entire table, you must place it in the FROM section, this is because FROM uses tables. Using it in the WHERE will error out
+SELECT round(avg(salary),2) as average_salary
+FROM salaries;
+	SELECT *
+    FROM salaries
+		JOIN employees e
+			USING (emp_no)
+    WHERE salary > (
+					SELECT round(avg(salary),2) as average_salary
+					FROM salaries) 
+                    AND to_date > NOW()
+	LIMIT 20
+;
+
+SELECT round(avg(salary),2) as average_salary
+FROM salaries;
+	SELECT emp_no, 
+    salary,
+   -- (SELECT round(avg(salary),2) as avg_sal from salaries) as average_salary
+    'hello'
+    FROM salaries
+		JOIN employees e
+			USING (emp_no)
+    WHERE salary > (
+					SELECT round(avg(salary),2) as average_salary
+					FROM salaries) 
+                    AND to_date > NOW()
+	LIMIT 20
+    ;
+-- Queries in the select statement can only hold a single value
+-- Inner query
+Select emp_no
+FROM dept_manager
+WHERE to_date > NOW()
+;
+
+-- Outer query
+Select first_name, last_name, birth_date, emp_no, d.dept_name -- dm.*, d.* -- .* shows all values on a selected table
+FROM employees
+	JOIN dept_manager dm
+		USING (emp_no)
+	JOIN departments d
+		USING (dept_no)
+WHERE emp_no IN ( -- must use IN here because the results are column of values -- can also use more levels of inner query
+	Select emp_no
+	FROM dept_manager
+	WHERE to_date > NOW()
+		AND emp_no > (select avg(emp_no) from dept_manager) -- nonsensical query but just showing how you can keep going down the rabbit hole
+	)
+;
+
+SELECT COUNT(cnt)
+FROM (
+Select
+	lower(
+		substr(first_name, 1, 1)
+        ,substr(last_name, 1, 4)
+        ,' '
+        ,lpad(month(birth_date),2,0)
