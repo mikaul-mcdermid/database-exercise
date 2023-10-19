@@ -9,24 +9,61 @@ WHERE hire_date = (
                     WHERE emp_no = 101010
                     )
 ;
+
+SELECT hire_date
+FROM employees
+WHERE emp_no = 101010
+;
+SELECT *
+FROM employees
+JOIN dept_emp
+	USING(emp_no)
+WHERE hire_date = (
+					SELECT hire_date
+					FROM employees
+					WHERE emp_no = 101010
+					)
+                    AND to_date > NOW()
+; -- A: 55 Employees 
+
 -- 2 Find all the titles ever held by all current employees with the first name Aamod.
-SELECT DISTINCT first_name, title as 'Titles Held' 
+SELECT emp_no -- use this to get a single list to be able to use WHERE clause
+FROM employees
+WHERE first_name = 'Aamod'
+;
+
+SELECT DISTINCT title
 FROM titles
-	JOIN employees
-		USING (emp_no)
-WHERE first_name = (
-				SELECT first_name
-				FROM employees
-                WHERE first_name = 'Aamod%' AND to_date > NOW()
-                )
-                ;
-SELECT first_name;
+JOIN employees
+	USING (emp_no)
+WHERE emp_no IN
+	(
+    SELECT emp_no -- use this to get a single list to be able to use WHERE clause
+	FROM employees
+	WHERE first_name = 'Aamod'
+    )
+    AND to_date > NOW()
+    ;
 -- 3 How many people in the employees table are no longer working for the company? Give the answer in a comment in your code.
 SELECT DISTINCT COUNT(*) as 'Fired'
 	FROM employees 
 	WHERE emp_no NOT IN (SELECT emp_no
 						FROM salaries
-						WHERE to_date > NOW());
+						WHERE to_date > NOW()); -- 59900
+     
+SELECT COUNT(*) as Count 
+FROM employees
+WHERE emp_no NOT IN
+	(
+	SELECT emp_no
+	FROM dept_emp
+	WHERE to_date > NOW()
+	)
+    ;
+SELECT *
+FROM dept_emp
+WHERE to_date > NOW() -- all the people currently working, will use this to filter out those who are NOT working with the company any more
+;
 -- 4 Find all the current department managers that are female. List their names in a comment in your code.
 SELECT CONCAT(e.first_name,' ',e.last_name) as Names, gender
 FROM (
@@ -39,13 +76,41 @@ FROM (
 		USING (emp_no)
 	WHERE to_date > NOW()
 ; -- 
+
+SELECT emp_no
+FROM dept_manager
+WHERE to_date > NOW()
+;
+
+SELECT CONCAT(first_name,' ',last_name) as 'Current Female Managers', gender
+FROM employees
+WHERE gender = 'F'
+	AND emp_no IN
+    (
+    SELECT emp_no
+	FROM dept_manager
+	WHERE to_date > NOW()
+	) -- 4 Employees
+;
 -- 5 Find all the employees who currently have a higher salary than the companie's overall, historical average salary.
 SELECT COUNT(emp_no) 
 FROM salaries s
 WHERE s.to_date > NOW() AND salary >= (SELECT round(avg(salary),0)
-FROM salaries);
+FROM salaries); -- 153543
 
+SELECT round(avg(salary),2) -- 63810.74
+FROM salaries
+;
 
+SELECT COUNT(*)
+FROM salaries
+WHERE to_date > NOW() AND
+	salary > 
+    (
+    SELECT round(avg(salary),2) -- 63810.74
+	FROM salaries
+	) -- 154543
+;
 -- 6 How many current salaries are within 1 standard deviation of the current highest salary? (Hint: you can use a built-in function to calculate the standard deviation.) What percentage of all salaries is this?
 describe max salary;
 -- describe stddev of max salary;
@@ -113,7 +178,7 @@ SELECT COUNT(salary) * 100 / (
 							SELECT COUNT(salary)
 							FROM salaries
 							WHERE to_date > NOW() -- 240124
-							)
+							) as Percent 
 FROM salaries
 WHERE to_date > NOW() AND salary >= (
 									SELECT MAX(salary) - ROUND(STD(salary),0) -- 140910 is the salary 1 STDDEV to the left of the max salary
@@ -121,6 +186,59 @@ WHERE to_date > NOW() AND salary >= (
 									WHERE to_date > NOW() -- 83
                                     )
                                     ;
+                                    
+SELECT std(salary) -- 17309.959 -- 1 stddev 
+FROM salaries
+WHERE to_date > NOW();
+
+SELECT MAX(salary) -- gives current max salary of 158220
+FROM salaries
+WHERE to_date > NOW()
+;
+
+SELECT *
+FROM salaries
+WHERE salary BETWEEN
+	(
+    cutoff point
+    )
+    AND -- LOGIC of the problem
+    (
+    max salary
+    )
+;
+    
+SELECT max(salary) - std(salary) as cutoff-- calculating cutoff point
+FROM salaries
+WHERE to_date >NOW() -- 140910.04
+;
+
+SELECT count(*)
+FROM salaries
+WHERE salary >=
+	(
+    SELECT max(salary) - std(salary) as cutoff-- calculating cutoff point
+	FROM salaries
+	WHERE to_date >NOW() -- 140910.04
+    )
+    AND  
+    to_date > NOW()  -- this gives us the amount of salaries between the stddev of the max 
+    ; -- 83
+
+SELECT COUNT(*) * 100 / (
+						SELECT COUNT(*)
+                        FROM salaries
+                        WHERE to_date >NOW()
+                        )
+FROM salaries
+WHERE salary >=
+	(
+    SELECT max(salary) - std(salary) as cutoff
+    FROM salaries
+    WHERE to_date >NOW()
+    )
+    AND to_date >NOW()
+    ; -- .0346%
 -- -- Hint You will likely use multiple subqueries in a variety of ways
 -- -- Hint It's a good practice to write out all of the small queries that you can. Add a comment above the query showing the number of rows returned. You will use this number (or the query that produced it) in other, larger queries.
 -- -- BONUS

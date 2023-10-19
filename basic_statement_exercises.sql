@@ -283,11 +283,92 @@ WHERE emp_no IN ( -- must use IN here because the results are column of values -
 	)
 ;
 
-SELECT COUNT(cnt)
+USE chipotle;
+SELECT database();
+SHOW tables;
+
+# FORMAT: IF(condition, value if true, value if false)
+SELECT distinct item_name
+	, IF (item_name LIKE '%chicken%', 'yes', 'no') as "Has Chicken"
+FROM orders 
+;
+
+SELECT distinct item_name
+	, IF (item_name LIKE '%chicken%', true, false) as "Has Chicken" -- SQL doesn't hold a data type for boolean values so it defaults to 0 or 1
+    , IF (item_name LIKE '%steak%', true, false) as "MOO"
+FROM orders 
+;
+
+SELECT distinct item_name
+	, item_name LIKE '%chicken%' as "Has Chicken" -- shortcut for writing if statements
+FROM orders 
+;
+
+SELECT count(has_chicken) -- subquery example, avoid using spaces cause it will error out
 FROM (
-Select
-	lower(
-		substr(first_name, 1, 1)
-        ,substr(last_name, 1, 4)
-        ,' '
-        ,lpad(month(birth_date),2,0)
+	SELECT distinct item_name
+	, IF (item_name LIKE '%chicken%', true, false) as "Has_Chicken" -- shortcut for writing if statements
+	FROM orders 
+	) as is_chicken
+    ;
+    
+    
+-- FORMAT:
+-- CASE
+-- 	WHEN column_a operator condition_a THEN value_a
+--     WHEN column_b operator condition_b THEN value_b
+--     ELSE value_c
+-- END as new_column_name
+-- */ 
+
+-- more flexibility
+-- multiple columns check
+-- ORDER MATTERS!
+;
+
+SELECT 
+	order_id
+    , item_name
+    , CASE
+		-- WHEN order_id = 3 THEN 'ORDER_3!' -- order matters
+		WHEN item_name LIKE '%chicken%' THEN 'is_chicken'
+        WHEN item_name LIKE '%steak%' THEN 'is_steak'
+        -- WHEN order_id = 3 THEN 'ORDER_3!' -- order matters
+        ELSE 'not_chicken_or_steak'
+	END as 'is_food' -- have to alias or it'll write this all as column name
+FROM orders
+;
+
+SELECT quantity, count(*)
+FROM orders
+GROUP BY quantity
+ORDER BY quantity
+;
+
+SELECT 
+	
+  --  , count(*) as cnt
+    CASE
+		WHEN quantity = 1 THEN 'single_order'
+        WHEN quantity <=5 THEN 'middle_size_order'
+        ELSE 'large order'
+	END as 'order_size'
+FROM orders
+GROUP BY order_size
+-- ORDER BY 
+;
+
+
+SELECT quantity, count(*),
+	CASE
+		WHEN item_name = 'Chicken Bowl' then item_name end as 'Chicken Bowl'
+	, count(CASE WHEN item_name = 'Chicken Crispy Taco' then item_name end) as 'Chicken Crispy Taco'
+    , count(CASE WHEN item_name = 'Chicken Soft Taco' then item_name end) as 'Chicken Soft Taco'
+    , count(CASE WHEN item_name = 'Chicken Burrito' then item_name end) as 'Chicken Burrito'
+    , count(CASE WHEN item_name = 'Chicken Salad Bowl' then item_name end) as 'Chicken Salad Bowl'
+    , count(CASE WHEN item_name = 'Chicken Salad' then item_name end) as 'Chicken Salad'
+FROM orders
+WHERE item_name LIKE '%chicken%'
+GROUP BY quantity
+ORDER BY quantity
+;
