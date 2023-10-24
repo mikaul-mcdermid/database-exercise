@@ -372,3 +372,17 @@ WHERE item_name LIKE '%chicken%'
 GROUP BY quantity
 ORDER BY quantity
 ;
+
+
+Use ursula_2331;
+Create temporary table runners;
+USE numbers_with_groups;
+SELECT student_id, COUNT(*)
+FROM student_grades
+GROUP BY final_grade;
+SELECT *
+FROM numbers_with_groups
+
+CREATE TABLE 
+;
+SELECT SUBSTR("Data Scienterrific", 10, LENGTH("Data Scienterrific")); 
